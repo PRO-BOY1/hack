@@ -1,3 +1,24 @@
+const urlParams = new URLSearchParams(window.location.search);
+const sessionId = urlParams.get("session");
+const BACKEND_URL = "https://141.11.167.247:6007/api/clamp-result"; // replace with your backend URL
+
+function reportResult(result) {
+  fetch(BACKEND_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      sessionId: sessionId,
+      result: result // "success" or "fail"
+    })
+  }).then(() => {
+    console.log("Reported result:", result);
+  });
+}
+
+
+
 let timerIntervalVar = null;
 let eKeyPressed = false;
 let slotPosition = 0;
@@ -20,22 +41,28 @@ function checkWin() {
     const movingSquare = document.querySelector('.moving-square');
     const squareSlot = document.querySelector('.square-slot');
     const buttonPress = document.querySelector('.button-press');
-    if (timerIntervalVar) {
-        clearInterval(timerIntervalVar);
-    }
+
+    if (timerIntervalVar) clearInterval(timerIntervalVar);
+
     if (slotPosition - 2 <= currPosition && currPosition <= slotPosition + 2) {
         movingSquare.style.scale = '1.2';
-        setTimeout(() => {
-            movingSquare.style.scale = '1';
-        }, 300);
+        setTimeout(() => { movingSquare.style.scale = '1'; }, 300);
+        
+        // ✅ Report success
+        reportResult("success");
         return true;
     }
+
     movingSquare.style.background = `radial-gradient(circle, rgb(255, 85, 76), rgba(132, 32, 32, 0.894))`;
     movingSquare.style.boxShadow = `0 0 5px 0px rgb(255, 0, 0)`;
     buttonPress.style.background = `radial-gradient(circle, rgb(255, 85, 76), rgba(132, 32, 32, 0.894))`;
     squareSlot.style.setProperty('--background-gradient', 'radial-gradient(circle, rgb(255, 85, 76), rgba(132, 32, 32, 0.894))');
+
+    // ❌ Report fail
+    reportResult("fail");
     return false;
 }
+
 function tick() {
     const movingSquare = document.querySelector('.moving-square');
     timerIntervalVar = setInterval(() => {
